@@ -193,6 +193,8 @@ begin
     erro 'Controle nao tem janela pai'. O Parent sera definido
     em CreateWnd, apos o handle do container existir. }
   FEdit             := TEdit.Create(Self);
+  FEdit.AutoSize    := False;   { ESSENCIAL no Lazarus: impede TEdit de
+                                  sobrescrever altura e criar loop de bounds }
   FEdit.BorderStyle := bsNone;
   FEdit.Color       := FFillColor;
   FEdit.TabStop     := False;
@@ -213,9 +215,10 @@ begin
   { Agora Self tem handle: podemos setar o Parent do FEdit com seguranca }
   if Assigned(FEdit) and (FEdit.Parent = nil) then
   begin
-    FEdit.Parent  := Self;
-    FEdit.Visible := not (csDesigning in ComponentState);
-    FEdit.Text    := FText;
+    FEdit.AutoSize := False;  { garante que AutoSize nao interfira }
+    FEdit.Parent   := Self;
+    FEdit.Visible  := not (csDesigning in ComponentState);
+    FEdit.Text     := FText;
     SyncEditColor;
     UpdateEditBounds;
   end;
