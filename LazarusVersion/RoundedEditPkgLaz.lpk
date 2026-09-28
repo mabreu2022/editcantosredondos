@@ -2,6 +2,7 @@
 <CONFIG>
   <Package Version="4">
     <Name Value="RoundedEditPkgLaz"/>
+    <Type Value="DesignTime"/>
     <Author Value="AntiGravity"/>
     <CompilerOptions>
       <Version Value="11"/>
