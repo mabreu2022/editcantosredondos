@@ -43,6 +43,7 @@ type
     FEdit               : TEdit;
     FText               : string;
     FUserOnChange       : TNotifyEvent;
+    FUpdatingBounds     : Boolean;   { guard contra loop Resize <-> SetBounds }
 
     FBorderColor        : TColor;
     FBorderColorFocused : TColor;
@@ -257,16 +258,21 @@ procedure TRoundedEdit.UpdateEditBounds;
 var
   HPad, VPos, EditH: Integer;
 begin
-  if not Assigned(FEdit) then Exit;
+  { Guard: evita loop Resize -> SetBounds -> Resize no Lazarus LCL }
+  if FUpdatingBounds or not Assigned(FEdit) or (FEdit.Parent = nil) then Exit;
+  FUpdatingBounds := True;
+  try
+    HPad  := FBorderWidth + 6;
+    EditH := CalcEditHeight;
 
-  HPad  := FBorderWidth + 6;
-  EditH := CalcEditHeight;
+    VPos := (Height - EditH) div 2;
+    if VPos < FBorderWidth + 2 then
+      VPos := FBorderWidth + 2;
 
-  VPos := (Height - EditH) div 2;
-  if VPos < FBorderWidth + 2 then
-    VPos := FBorderWidth + 2;
-
-  FEdit.SetBounds(HPad, VPos, Width - HPad * 2, EditH);
+    FEdit.SetBounds(HPad, VPos, Width - HPad * 2, EditH);
+  finally
+    FUpdatingBounds := False;
+  end;
 end;
 
 procedure TRoundedEdit.SyncEditColor;
@@ -378,7 +384,8 @@ end;
 procedure TRoundedEdit.Resize;
 begin
   inherited;
-  UpdateEditBounds;
+  if not FUpdatingBounds then
+    UpdateEditBounds;
 end;
 
 procedure TRoundedEdit.SetEnabled(Value: Boolean);
