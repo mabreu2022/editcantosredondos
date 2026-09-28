@@ -45,8 +45,8 @@ type
     FPlaceholderColor   : TColor;
     FFocused            : Boolean;
 
-    { Wrappers TEdit - GetText/SetText ficam em 'protected override'
-      pois TControl os declara como protected virtual }
+    { Wrappers TEdit - GetText/SetText como metodos privados simples
+      (TControl nao expoe mais GetText/SetText virtual no Delphi 13.1) }
     function  GetPasswordChar: Char;
     procedure SetPasswordChar(Value: Char);
     function  GetMaxLength: Integer;
@@ -55,6 +55,9 @@ type
     procedure SetReadOnly(Value: Boolean);
     function  GetCharCase: TEditCharCase;
     procedure SetCharCase(Value: TEditCharCase);
+    function  GetText: string;
+    procedure SetText(Value: string);
+
     function  GetOnChange: TNotifyEvent;
     procedure SetOnChange(Value: TNotifyEvent);
     function  GetOnKeyDown: TKeyEvent;
@@ -84,11 +87,6 @@ type
     procedure EditChange(Sender: TObject);
 
   protected
-    { GetText/SetText como protected override: evita conflito de vtable
-      com TControl.GetText/SetText (protected virtual) no Delphi 13+ }
-    function  GetText: TCaption; override;
-    procedure SetText(const Value: TCaption); override;
-
     procedure Loaded; override;
     procedure Paint; override;
     procedure Resize; override;
@@ -103,7 +101,7 @@ type
     property InnerEdit: TEdit read FEdit;
 
   published
-    property Text         : string        read GetText        write SetText;
+    property Text : string read GetText write SetText;
     property PasswordChar : Char          read GetPasswordChar write SetPasswordChar default #0;
     property MaxLength    : Integer       read GetMaxLength    write SetMaxLength    default 0;
     property ReadOnly     : Boolean       read GetReadOnly     write SetReadOnly     default False;
@@ -420,13 +418,12 @@ end;
 {  Wrappers TEdit                                                               }
 { ---------------------------------------------------------------------------- }
 
-function TRoundedEdit.GetText: TCaption;
+function TRoundedEdit.GetText: string;
 begin
-  { Retorna FText (campo interno seguro) }
   Result := FText;
 end;
 
-procedure TRoundedEdit.SetText(const Value: TCaption);
+procedure TRoundedEdit.SetText(Value: string);
 begin
   if FText <> Value then
   begin
