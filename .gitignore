@@ -1,0 +1,31 @@
+# Delphi compilados
+*.dcu
+*.dcp
+*.bpl
+*.exe
+*.dll
+*.map
+*.res
+*.rsm
+*.drc
+*.local
+*.identcache
+*.otares
+*.vlb
+*.deployproj
+
+# Lazarus compilados
+*.ppu
+*.o
+*.a
+lib/
+
+# Historico e backups do IDE
+__history/
+__recovery/
+*.~*
+*.bak
+
+# Arquivos compactados (gerados automaticamente)
+*.rar
+*.zip
