@@ -3,7 +3,7 @@ unit RoundedEdit;
 {
   TRoundedEdit - Componente Edit com cantos arredondados para Delphi VCL
   ========================================================================
-  Versao : 2.2
+  Versao : 2.3
   Autor  : AntiGravity
 
   Correcoes:
@@ -45,9 +45,8 @@ type
     FPlaceholderColor   : TColor;
     FFocused            : Boolean;
 
-    { Wrappers TEdit }
-    function  GetText: string;
-    procedure SetText(const Value: string);
+    { Wrappers TEdit - GetText/SetText ficam em 'protected override'
+      pois TControl os declara como protected virtual }
     function  GetPasswordChar: Char;
     procedure SetPasswordChar(Value: Char);
     function  GetMaxLength: Integer;
@@ -85,6 +84,11 @@ type
     procedure EditChange(Sender: TObject);
 
   protected
+    { GetText/SetText como protected override: evita conflito de vtable
+      com TControl.GetText/SetText (protected virtual) no Delphi 13+ }
+    function  GetText: TCaption; override;
+    procedure SetText(const Value: TCaption); override;
+
     procedure Loaded; override;
     procedure Paint; override;
     procedure Resize; override;
@@ -416,13 +420,13 @@ end;
 {  Wrappers TEdit                                                               }
 { ---------------------------------------------------------------------------- }
 
-function TRoundedEdit.GetText: string;
+function TRoundedEdit.GetText: TCaption;
 begin
-  { Sempre retorna FText (campo seguro) }
+  { Retorna FText (campo interno seguro) }
   Result := FText;
 end;
 
-procedure TRoundedEdit.SetText(const Value: string);
+procedure TRoundedEdit.SetText(const Value: TCaption);
 begin
   if FText <> Value then
   begin
