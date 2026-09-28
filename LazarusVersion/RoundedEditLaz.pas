@@ -95,6 +95,7 @@ type
 
   protected
     procedure Loaded; override;
+    procedure CreateWnd; override;
     procedure Paint; override;
     procedure Resize; override;
     procedure SetEnabled(Value: Boolean); override;
@@ -186,8 +187,11 @@ begin
   Width   := 200;
   Height  := 36;
 
+  { Cria o edit interno SEM definir Parent aqui!
+    No Lazarus, setar Parent no constructor (sem handle) causa
+    erro 'Controle nao tem janela pai'. O Parent sera definido
+    em CreateWnd, apos o handle do container existir. }
   FEdit             := TEdit.Create(Self);
-  FEdit.Parent      := Self;
   FEdit.BorderStyle := bsNone;
   FEdit.Color       := FFillColor;
   FEdit.TabStop     := False;
@@ -195,16 +199,29 @@ begin
   FEdit.OnEnter     := @EditEnter;
   FEdit.OnExit      := @EditExit;
   FEdit.OnChange    := @EditChange;
-
-  { Design time: FEdit oculto, Paint desenha tudo.
-    Run time   : FEdit visivel para edicao real. }
-  FEdit.Visible := not (csDesigning in ComponentState);
-
-  UpdateEditBounds;
+  FEdit.Visible     := not (csDesigning in ComponentState);
 end;
 
 { ---------------------------------------------------------------------------- }
-{  Loaded - apos DFM/LFM ser carregado                                         }
+{  CreateWnd - seguro para configurar FEdit apos o handle existir             }
+{ ---------------------------------------------------------------------------- }
+
+procedure TRoundedEdit.CreateWnd;
+begin
+  inherited CreateWnd;
+  { Agora Self tem handle: podemos setar o Parent do FEdit com seguranca }
+  if Assigned(FEdit) and (FEdit.Parent = nil) then
+  begin
+    FEdit.Parent  := Self;
+    FEdit.Visible := not (csDesigning in ComponentState);
+    FEdit.Text    := FText;
+    SyncEditColor;
+    UpdateEditBounds;
+  end;
+end;
+
+{ ---------------------------------------------------------------------------- }
+{  Loaded - apos LFM ser carregado                                             }
 { ---------------------------------------------------------------------------- }
 
 procedure TRoundedEdit.Loaded;
@@ -225,9 +242,10 @@ end;
 
 function TRoundedEdit.CalcEditHeight: Integer;
 begin
-  { Canvas.TextHeight e' cross-platform e nao precisa de GetDC/ReleaseDC }
-  Canvas.Font.Assign(Font);
-  Result := Canvas.TextHeight('Wg|') + 6;
+  { Usa Font.Height direto: seguro mesmo sem handle (nao usa Canvas) }
+  Result := Abs(Font.Height);
+  if Result <= 0 then Result := 13;
+  Inc(Result, 6);
   if Result < 18 then Result := 18;
 end;
 
