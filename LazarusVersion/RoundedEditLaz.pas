@@ -333,12 +333,12 @@ begin
       DrawStr := FText;
       if FEdit.PasswordChar <> #0 then
         DrawStr := StringOfChar(FEdit.PasswordChar, Length(DrawStr));
-      Canvas.TextRect(TextR, DrawStr, TS);
+      Canvas.TextRect(TextR, TextR.Left, TextR.Top, DrawStr, TS);
     end
     else if FPlaceholderText <> '' then
     begin
       Canvas.Font.Color := FPlaceholderColor;
-      Canvas.TextRect(TextR, FPlaceholderText, TS);
+      Canvas.TextRect(TextR, TextR.Left, TextR.Top, FPlaceholderText, TS);
     end;
   end
   else
@@ -348,7 +348,7 @@ begin
     begin
       Canvas.Font.Assign(Font);
       Canvas.Font.Color := FPlaceholderColor;
-      Canvas.TextRect(TextR, FPlaceholderText, TS);
+      Canvas.TextRect(TextR, TextR.Left, TextR.Top, FPlaceholderText, TS);
     end;
   end;
 end;
